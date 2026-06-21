@@ -57,6 +57,7 @@ def Information_Invoice(text=None, image=None):
         - Tên món ăn
         - Giá món ăn
         - Số lượng
+
         Trả đúng schema JSON.
         """,
         model="gpt-5.4-mini",
@@ -64,10 +65,21 @@ def Information_Invoice(text=None, image=None):
         temperature=0.1,
         text_format=Invoice
     )
-    invoice = response.output_parsed
 
-    tong_hd = sum(
-        item.price * item.quantity
-        for item in invoice.items
+    return response.output_parsed
+
+invoice = Information_Invoice(
+    text="""
+    Phở bò 45000 x 2
+    Trà đá 5000 x 3
+    """
 )
-    print(f"Tổng tiền: {tong_hd:,.0f} VND")
+
+print(invoice)
+
+tong_hd = sum(
+    item.price * item.quantity
+    for item in invoice.items
+)
+
+print(f"Tổng tiền: {tong_hd:,.0f} VND")
