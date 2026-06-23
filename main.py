@@ -16,39 +16,26 @@ class Invoice(BaseModel):
 
 def Information_Invoice(text=None, image=None):
     chat_histories = []
-    # upload ảnh
+    content = []
+
     if image is not None:
         with open(image, "rb") as file_invoice:
             img_base64 = base64.b64encode(
                 file_invoice.read()
             ).decode()
-        chat_histories.append(
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": "Hãy đọc hóa đơn này"
-                    },
-                    {
-                        "type": "input_image",
-                        "image_url": f"data:image/jpeg;base64,{img_base64}"
-                    }
-                ]
-            }
-        )
-    #  text
-    elif text:
-        chat_histories.append(
-            {
-                "role": "user",
-                "content": text
-            }
-        )
+        content.append({
+            "type": "input_image",
+            "image_url": f"data:image/jpeg;base64,{img_base64}"
+        })
+
+    if text:
+        content.append({"type": "input_text", "text": text})
+    elif image:
+        content.append({"type": "input_text", "text": "Hãy đọc hóa đơn này"})
     else:
-        raise ValueError(
-            "Vui lòng nhập hóa đơn hoặc tải ảnh hóa đơn."
-        )
+        raise ValueError("Vui lòng nhập hóa đơn hoặc tải ảnh hóa đơn.")
+
+    chat_histories.append({"role": "user", "content": content})
     response = client.responses.parse(
         instructions="""
         Bạn là một chuyên gia đọc hóa đơn món ăn.
@@ -68,18 +55,19 @@ def Information_Invoice(text=None, image=None):
 
     return response.output_parsed
 
-invoice = Information_Invoice(
-    text="""
-    Phở bò 45000 x 2
-    Trà đá 5000 x 3
-    """
-)
+if __name__ == "__main__":
+    invoice = Information_Invoice(
+        text="""
+        Phở bò 45000 x 2
+        Trà đá 5000 x 3
+        """
+    )
 
-print(invoice)
+    print(invoice)
 
-tong_hd = sum(
-    item.price * item.quantity
-    for item in invoice.items
-)
+    tong_hd = sum(
+        item.price * item.quantity
+        for item in invoice.items
+    )
 
-print(f"Tổng tiền: {tong_hd:,.0f} VND")
+    print(f"Tổng tiền: {tong_hd:,.0f} VND")
